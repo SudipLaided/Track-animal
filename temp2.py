@@ -1,18 +1,10 @@
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
-from matplotlib.collections import PatchCollection
-from matplotlib.patches import Polygon
-import numpy as np
+
+
 import sqlite3
 
-# Make the figure
-#fig = plt.figure()
-#ax = fig.add_subplot(111)
 
-# Easiest way to make a basemap is to use the cylidrical projection and 
-# define the bottom left lat/lon and top right lat/lon corners
-
-# Map of Utah
 bot_left_lat  =28.25100
 bot_left_lon  =83.97191
 top_right_lat =28.25700
@@ -57,19 +49,21 @@ print "...finished"
 
 conn = sqlite3.connect("dbs1.db")
 cur = conn.cursor()
+re = cur.execute("SELECT id FROM data where id = (select max(id) from data) ").fetchone()
+mx = re[0]
+print(mx)
 cur.execute("select * from data ;")
 results = cur.fetchall()
 
-coords = cur.execute(""" select lon ,lat ,temp from data;""" \
+coords = cur.execute(""" select id, lon ,lat ,temp from data;""" \
                      ).fetchall()
-lons = [l[0] for l in coords]
-lats = [l[1] for l in coords]
-temp = [l[2] for l in coords]
+idd  = [l[0] for l in coords]
+lons = [l[1] for l in coords]
+lats = [l[2] for l in coords]
+temp = [l[3] for l in coords]
 
 #m.plot(x, y, 'ro',markersize = 6, alpha =0.3)
 def get_color(tmp):
-    # Returns green for small earthquakes, yellow for moderate
-    #  earthquakes, and red for significant earthquakes.
     if tmp < 30.0:
         return ('b')
     elif tmp <= 39.0 and tmp>=30 :
@@ -83,13 +77,24 @@ def get_color(tmp):
 # Plot a scatter point at WBB on the map object
 #lon = [83.97493,83.97847]
 #lat = [28.25281,28.25386]
-for lon, lat, mag in zip(lons, lats, temp):
+for ide ,lon, lat, mag in zip(idd, lons, lats, temp): 
 	x,y = (lon, lat)
 	markerst = get_color(mag)
-	m.scatter(x,y,c=markerst,s=100,alpha=0.8,marker="*")
+	if mx == ide:
+		print(ide)
+		magg = 50*5
+		
+		
+	else:
+		print(ide)
+		magg = 50
+		
+		
+	m.scatter(x,y,c=markerst,s=magg,alpha=0.8,marker="*")
 
 
 
-plt.xlabel('this is the x label')
+plt.xlabel('this is the longitudes ')
+plt.ylabel('this is the latitude ')
 
 plt.show()
